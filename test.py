@@ -7,7 +7,7 @@ import torch
 from torchvision import datasets, transforms
 from torchvision import models
 
-from helper import device
+from transferLearner import device
 from gradcam import GradCam, save_class_activation_images
 
 data_dir = "data/polygonia_224_3cat_oversample-16"
