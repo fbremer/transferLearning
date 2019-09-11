@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
 
+
 from helper import train_model, initialize_model, device
 
 # Top level data directory. Here we assume the format of the directory conforms
@@ -20,7 +21,7 @@ from helper import train_model, initialize_model, device
 # model_name = "squeezenet"
 
 # Number of classes in the dataset
-num_classes = 2
+num_classes = 3
 
 # Batch size for training (change depending on how much memory you have)
 batch_size = 8
@@ -30,13 +31,13 @@ num_epochs = 15
 
 # Flag for feature extracting. When False, we finetune the whole model,
 #   when True we only update the reshaped layer params
-feature_extract = True
+feature_extract = False
 
 if __name__ == "__main__":
-    for data_dir in ["data/hymenoptera_data"]:
+    for data_dir in ["data/polygonia_224_3cat_oversample-20"]:
 
         # for model_name in ["resnet", "alexnet", "vgg", "squeezenet", "densenet"]:
-        for model_name in ["squeezenet"]:
+        for model_name in ["alexnet"]:
 
             # Initialize the model for this run
             model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
@@ -64,12 +65,13 @@ if __name__ == "__main__":
             print("Initializing Datasets and Dataloaders...")
 
             # Create training and validation datasets
-            image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
+            image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
+                              for x in ['train', 'val']}
             # Create training and validation dataloaders
-            dataloaders_dict = {
-                x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=4)
-                for x in ['train', 'val']
-            }
+            dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=4)
+                           for x in ['train', 'val']}
+            class_names = image_datasets['train'].classes
+
 
             # Send the model to GPU
             model_ft = model_ft.to(device)
@@ -104,7 +106,7 @@ if __name__ == "__main__":
                                                "_finetune" if feature_extract is False else "")
 
             # Train and evaluate
-            model_ft, hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs,
+            model_ft, hist = train_model(model_ft, dataloaders, criterion, optimizer_ft, num_epochs=num_epochs,
                                          is_inception=(model_name == "inception"), log_dir=log_dir)
 
             torch.save(model_ft.state_dict(),
@@ -113,3 +115,5 @@ if __name__ == "__main__":
                                                    num_epochs,
                                                    sorted(hist)[-1],
                                                    "_finetune" if feature_extract is False else ""))
+
+
