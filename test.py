@@ -7,12 +7,12 @@ import torch
 from torchvision import datasets, transforms
 from torchvision import models
 
-from transferLearner import device
 from gradcam import GradCam, save_class_activation_images
+from transferLearner import device
 
-data_dir = "data/polygonia_224_3cat_oversample-16"
+data_dir = "data/polygonia_224_6cat_oversample-10"
 batch_size = 8
-num_classes = 3
+num_classes = 6
 input_size = 224
 model_name = "alexnet"
 feature_extract = True
@@ -24,7 +24,8 @@ pretrained_model = models.alexnet(pretrained=True)
 num_ftrs = pretrained_model.classifier[6].in_features
 pretrained_model.classifier[6] = torch.nn.Linear(num_ftrs, num_classes)
 
-pretrained_model.load_state_dict(torch.load('polygonia_224_3cat_oversample-20_alexnet_15_0.933333_finetune.pth'))
+pretrained_model.load_state_dict(
+    torch.load('polygonia_224_6cat_oversample-10_alexnet_7_0.8253970.9333333333333333.pth'))
 pretrained_model.eval()
 
 data_transforms = {
@@ -45,9 +46,6 @@ dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batc
 class_names = image_datasets['test'].classes
 
 
-
-
-
 def process_image(image):
     ''' Scales, crops, and normalizes a PIL image for a PyTorch model,
         returns an Numpy array
@@ -61,7 +59,7 @@ def process_image(image):
     ])
     image = preprocess(image)
     # image.unsqueeze_(0)
-    return image #torch.autograd.Variable(image, requires_grad=True)
+    return image  # torch.autograd.Variable(image, requires_grad=True)
 
 
 def only_crop_image(image):
@@ -99,8 +97,8 @@ def predict2(image_path, model, topk=3):
 
     return (e.data.numpy().squeeze().tolist() for e in topk)
 
-for image_path in glob.glob("data/polygonia_224_3cat_oversample-20/test/*/*"):
 
+for image_path in glob.glob("data/polygonia_224_6cat_oversample-10/test/*/*"):
     # image_path = 'data/polygonia_224_3cat_oversample-20/test/progne/progne_UASM370053_dorsal.jpg'
     img = PIL.Image.open(image_path)
 
@@ -112,14 +110,12 @@ for image_path in glob.glob("data/polygonia_224_3cat_oversample-20/test/*/*"):
     print(probs)
     # print(*label, sep=", ")
     print([idx_to_class[idx] for idx in label], sep=", ")
-    print("-"*60 + "\n")
-
+    print("-" * 60 + "\n")
 
     # gradcam
     original_image = PIL.Image.open(image_path).convert('RGB')
     prep_img = process_image(original_image).unsqueeze(0)
     crop_image = only_crop_image(original_image)
-
 
     target_class = label[0]
     file_name_to_export = "butterfly_gradcam"

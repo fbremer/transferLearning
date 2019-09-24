@@ -93,6 +93,7 @@ def apply_colormap_on_image(org_im, activation, colormap_name):
     """
     # Get colormap
     color_map = mpl_color_map.get_cmap(colormap_name)
+    # color_map = cc.m_CET_D4
     no_trans_heatmap = color_map(activation)
     # Change alpha channel in colormap to make sure original image is displayed
     heatmap = copy.copy(no_trans_heatmap)
@@ -119,10 +120,10 @@ def save_class_activation_images(org_img, activation_map, file_name):
     if not os.path.exists('results'):
         os.makedirs('results')
     # Grayscale activation map
-    heatmap, heatmap_on_image = apply_colormap_on_image(org_img, activation_map, 'hsv')
+    heatmap, heatmap_on_image = apply_colormap_on_image(org_img, activation_map, "cet_fire") #'hsv')
     # Save colored heatmap
-    # path_to_file = os.path.join('results', file_name+'_Cam_Heatmap.png')
-    # save_image(heatmap, path_to_file)
+    path_to_file = os.path.join('results', file_name+'_Cam_Heatmap.png')
+    save_image(heatmap, path_to_file)
     # Save heatmap on iamge
     path_to_file = os.path.join('results', file_name+'_Cam_On_Image.png')
     save_image(heatmap_on_image, path_to_file)
