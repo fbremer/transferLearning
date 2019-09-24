@@ -2,7 +2,10 @@ from __future__ import division
 from __future__ import print_function
 
 import copy
+import os
+import re
 import time
+from glob import glob
 
 import torch
 import torch.nn as nn
@@ -22,10 +25,11 @@ embedding_log = 5
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False, log_dir="logs"):
     since = time.time()
 
-    val_acc_history = []
+    hist = []
 
-    best_model_wts = copy.deepcopy(model.state_dict())
+    # best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
+    best_epoch = []
 
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
@@ -94,12 +98,23 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
 
             writer.close()
 
-            # deep copy the model
-            if phase == 'val' and epoch_acc > best_acc:
-                best_acc = epoch_acc
-                best_model_wts = copy.deepcopy(model.state_dict())
+            # save history
+            if phase == 'train':
+                hist.append({"epoch": epoch,
+                             "train_loss": epoch_acc,
+                             "train_acc": epoch_acc,
+                             })
+
             if phase == 'val':
-                val_acc_history.append(epoch_acc)
+                hist[epoch].update({"val_loss": epoch_acc,
+                                    "val_acc": epoch_acc,
+                                    })
+
+            # deep copy the model
+            if phase == 'val' and epoch_acc >= best_acc:
+                best_acc = epoch_acc
+                best_epoch.append(epoch)
+                hist[epoch].update({"model_wts": copy.deepcopy(model.state_dict())})
 
         print()
 
@@ -108,8 +123,8 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
     print('Best val Acc: {:4f}'.format(best_acc))
 
     # load best model weights
-    model.load_state_dict(best_model_wts)
-    return model, val_acc_history
+    # model.load_state_dict(hist[best_epoch]["model_wts"])
+    return best_epoch, hist
 
 
 def set_parameter_requires_grad(model, feature_extracting):
@@ -188,3 +203,33 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         exit()
 
     return model_ft, input_size
+
+
+def get_unique_dir(path, width=3):
+    # if it doesn't exist, create
+    if not os.path.isdir(path):
+        # log.debug("Creating new directory - {}".format(path))
+        os.makedirs(path)
+        return path
+
+    # if it's empty, use
+    if not os.listdir(path):
+        # log.debug("Using empty directory - {}".format(path))
+        return path
+
+    # otherwise, increment the highest number folder in the series
+
+    def get_trailing_number(search_text):
+        serch_obj = re.search(r"([0-9]+)$", search_text)
+        if not serch_obj:
+            return 0
+        else:
+            return int(serch_obj.group(1))
+
+    dirs = glob(path + "*")
+    next_num = sorted([get_trailing_number(d) for d in dirs])[-1] + 1
+    new_path = "{0}_{1:0>{2}}".format(path, next_num, width)
+
+    # log.debug("Creating new incremented directory - {}".format(new_path))
+    os.makedirs(new_path)
+    return new_path
