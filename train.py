@@ -4,14 +4,14 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+from glob import glob
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
 
-
-from transferLearner import train_model, initialize_model, device
+from transferLearner import train_model, initialize_model, device, get_unique_dir
 
 # Top level data directory. Here we assume the format of the directory conforms
 #   to the ImageFolder structure
@@ -21,7 +21,7 @@ from transferLearner import train_model, initialize_model, device
 # model_name = "squeezenet"
 
 # Number of classes in the dataset
-num_classes = 3
+# num_classes = 6
 
 # Batch size for training (change depending on how much memory you have)
 batch_size = 8
@@ -31,19 +31,22 @@ num_epochs = 15
 
 # Flag for feature extracting. When False, we finetune the whole model,
 #   when True we only update the reshaped layer params
-feature_extract = False
+feature_extract = True
 
 if __name__ == "__main__":
-    for data_dir in ["data/polygonia_224_3cat_oversample-20"]:
+    for data_dir in ["data/polygonia_224_6cat_oversample-10", "data/polygonia_224_3cat_oversample-20"]:
+
+        # Number of classes in the dataset
+        num_classes = len(glob(data_dir + "/train/*"))
 
         # for model_name in ["resnet", "alexnet", "vgg", "squeezenet", "densenet"]:
-        for model_name in ["alexnet"]:
+        for model_name in ["resnet", "alexnet", "vgg", "squeezenet", "densenet"]:
 
             # Initialize the model for this run
-            model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
+            model, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
 
             # Print the model we just instantiated
-            print(model_ft)
+            print(model)
 
             # Data augmentation and normalization for training
             # Just normalization for validation
@@ -74,7 +77,7 @@ if __name__ == "__main__":
 
 
             # Send the model to GPU
-            model_ft = model_ft.to(device)
+            model = model.to(device)
 
             # Gather the parameters to be optimized/updated in this run. If we are
             #  finetuning we will be updating all parameters. However, if we are
@@ -84,13 +87,13 @@ if __name__ == "__main__":
             print("Params to learn:")
             if feature_extract:
                 params_to_update = []
-                for name, param in model_ft.named_parameters():
+                for name, param in model.named_parameters():
                     if param.requires_grad:
                         params_to_update.append(param)
                         print("\t", name)
             else:
-                params_to_update = model_ft.parameters()
-                for name, param in model_ft.named_parameters():
+                params_to_update = model.parameters()
+                for name, param in model.named_parameters():
                     if param.requires_grad:
                         print("\t", name)
 
@@ -100,18 +103,29 @@ if __name__ == "__main__":
             # Setup the loss fxn
             criterion = nn.CrossEntropyLoss()
 
-            log_dir = "runs/{}_{}_{}{}".format(os.path.basename(data_dir),
-                                               model_name,
-                                               num_epochs,
-                                               "_finetune" if feature_extract is False else "")
+            run_id = "{}_{}{}".format(os.path.basename(data_dir),
+                                      model_name,
+                                      "_finetune" if feature_extract is False else "")
+
+            log_dir = get_unique_dir(os.path.join("logs", run_id))
+
+            run_id_inc = os.path.basename(log_dir)
+            model_dir = os.path.join("models", run_id_inc)
+            if not os.path.exists(model_dir):
+                os.makedirs(model_dir)
 
             # Train and evaluate
-            model_ft, hist = train_model(model_ft, dataloaders, criterion, optimizer_ft, num_epochs=num_epochs,
-                                         is_inception=(model_name == "inception"), log_dir=log_dir)
+            best_epochs, training_hist = train_model(model, dataloaders, criterion, optimizer_ft, num_epochs=num_epochs,
+                                                     is_inception=(model_name == "inception"), log_dir=log_dir)
 
-            torch.save(model_ft.state_dict(),
-                       "{}_{}_{}_{:4f}{}.pth".format(os.path.basename(data_dir),
-                                                   model_name,
-                                                   num_epochs,
-                                                   sorted(hist)[-1],
-                                                   "_finetune" if feature_extract is False else ""))
+
+
+            for epoch in best_epochs:
+                model_wts = training_hist[epoch]["model_wts"]
+                train_acc = training_hist[epoch]["train_acc"]
+                val_acc = training_hist[epoch]["val_acc"]
+
+                torch.save(model_wts, os.path.join(model_dir, "{}_ep{}_trn{:.2f}_val{:.2f}.pth".format(run_id,
+                                                                                                     epoch,
+                                                                                                     train_acc,
+                                                                                                     val_acc)))
