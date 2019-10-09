@@ -5,7 +5,7 @@ import copy
 import os
 import re
 import time
-from glob import glob
+import glob
 
 import torch
 import torch.nn as nn
@@ -150,6 +150,7 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
 
     elif model_name == "alexnet":
         """ Alexnet
+        target 11
         """
         model_ft = models.alexnet(pretrained=use_pretrained)
         set_parameter_requires_grad(model_ft, feature_extract)
@@ -161,6 +162,44 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         """ VGG11_bn
         """
         model_ft = models.vgg11_bn(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.classifier[6].in_features
+        model_ft.classifier[6] = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    elif model_name == "vgg16":
+        """ vgg19
+        """
+        model_ft = models.vgg19(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.classifier[6].in_features
+        model_ft.classifier[6] = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    elif model_name == "vgg16_bn":
+        """ vgg16_bn
+        """
+        model_ft = models.vgg19_bn(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.classifier[6].in_features
+        model_ft.classifier[6] = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    elif model_name == "vgg19":
+        """ vgg19
+        target 35
+        """
+        model_ft = models.vgg19(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.classifier[6].in_features
+        model_ft.classifier[6] = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    elif model_name == "vgg19_bn":
+        """ vgg19_bn
+        target 51
+        """
+        model_ft = models.vgg19_bn(pretrained=use_pretrained)
         set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model_ft.classifier[6].in_features
         model_ft.classifier[6] = nn.Linear(num_ftrs, num_classes)
@@ -184,19 +223,19 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         model_ft.classifier = nn.Linear(num_ftrs, num_classes)
         input_size = 224
 
-    elif model_name == "inception":
-        """ Inception v3
-        Be careful, expects (299,299) sized images and has auxiliary output
-        """
-        model_ft = models.inception_v3(pretrained=use_pretrained)
-        set_parameter_requires_grad(model_ft, feature_extract)
-        # Handle the auxilary net
-        num_ftrs = model_ft.AuxLogits.fc.in_features
-        model_ft.AuxLogits.fc = nn.Linear(num_ftrs, num_classes)
-        # Handle the primary net
-        num_ftrs = model_ft.fc.in_features
-        model_ft.fc = nn.Linear(num_ftrs, num_classes)
-        input_size = 299
+    # elif model_name == "inception":
+    #     """ Inception v3
+    #     Be careful, expects (299,299) sized images and has auxiliary output
+    #     """
+    #     model_ft = models.inception_v3(pretrained=use_pretrained)
+    #     set_parameter_requires_grad(model_ft, feature_extract)
+    #     # Handle the auxilary net
+    #     num_ftrs = model_ft.AuxLogits.fc.in_features
+    #     model_ft.AuxLogits.fc = nn.Linear(num_ftrs, num_classes)
+    #     # Handle the primary net
+    #     num_ftrs = model_ft.fc.in_features
+    #     model_ft.fc = nn.Linear(num_ftrs, num_classes)
+    #     input_size = 299
 
     else:
         print("Invalid model name, exiting...")
@@ -226,7 +265,7 @@ def get_unique_dir(path, width=3):
         else:
             return int(serch_obj.group(1))
 
-    dirs = glob(path + "*")
+    dirs = glob.glob(path + "*")
     next_num = sorted([get_trailing_number(d) for d in dirs])[-1] + 1
     new_path = "{0}_{1:0>{2}}".format(path, next_num, width)
 
