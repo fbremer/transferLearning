@@ -4,47 +4,18 @@ import os
 import PIL
 import numpy as np
 import torch
-from torchvision import datasets, transforms
-from torchvision import models
+from torchvision import transforms
+import colorcet as cc
 
 from gradcam import GradCam, save_class_activation_images
-from transferLearner import device
+from transferLearner import device, initialize_model
 
-data_dir = "data/polygonia_224_6cat_oversample-10"
-batch_size = 8
-num_classes = 6
-input_size = 224
-model_name = "alexnet"
-feature_extract = True
 
-# Initialize the model for this run
-# pretrained_model = models.AlexNet(num_classes=num_classes)
-
-pretrained_model = models.alexnet(pretrained=True)
-num_ftrs = pretrained_model.classifier[6].in_features
-pretrained_model.classifier[6] = torch.nn.Linear(num_ftrs, num_classes)
-
-pretrained_model.load_state_dict(
-    torch.load('polygonia_224_6cat_oversample-10_alexnet_7_0.8253970.9333333333333333.pth'))
-pretrained_model.eval()
-
-data_transforms = {
-    'test': transforms.Compose([
-        transforms.Resize(input_size),
-        transforms.CenterCrop(input_size),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-}
-
-# Create training and validation datasets
-image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
-                  for x in ['test']}
-# Create training and validation dataloaders
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=False, num_workers=4)
-               for x in ['test']}
-class_names = image_datasets['test'].classes
-
+def find_classes(dir):
+    classes = [d for d in os.listdir(dir) if os.path.isdir(os.path.join(dir, d))]
+    classes.sort()
+    class_to_idx = {classes[i]: i for i in range(len(classes))}
+    return classes, class_to_idx
 
 def process_image(image):
     ''' Scales, crops, and normalizes a PIL image for a PyTorch model,
@@ -98,12 +69,46 @@ def predict2(image_path, model, topk=3):
     return (e.data.numpy().squeeze().tolist() for e in topk)
 
 
-for image_path in glob.glob("data/polygonia_224_6cat_oversample-10/test/*/*"):
+# regex = r"([0-9]+)$"
+# serch_obj = re.search(regex, model_dir)
+# if not serch_obj:
+#     pass
+# else:
+#     pass
+#     # return int(serch_obj.group(1))
+
+# table_header = ("model_name", "target_layer", "data_dir", "model_dir")
+# table_data = [("alexnet", 11, "data/polygonia_dorsal_224_3cat_oversample-10/test", "models/polygonia_dorsal_224_3cat_oversample-10_alexnet_finetune/polygonia_dorsal_224_3cat_oversample-10_alexnet_finetune_ep6_trn0.94_val1.00.pth"),
+#               ()]
+
+
+model_dir = ("models/polygonia_dorsal_224_3cat_oversample-10_alexnet_finetune/"
+             "polygonia_dorsal_224_3cat_oversample-10_alexnet_finetune_ep6_trn0.94_val1.00.pth")
+
+data_dir = "data/polygonia_dorsal_224_3cat_oversample-10/test"  # could be parsed from model dir?
+model_name = "alexnet"  # can be parsed from model_dir?
+target_layer = 35  # depends on model_name
+
+batch_size = 8
+
+# classes in the dataset
+classes, class_to_idx = find_classes(data_dir)
+idx_to_class = {v: k for k, v in class_to_idx.items()}
+
+# load model
+pretrained_model, input_size = initialize_model(model_name, len(classes), feature_extract=False, use_pretrained=True)
+
+# load weights
+pretrained_model.load_state_dict(
+    torch.load(model_dir))
+pretrained_model.eval()
+
+# classify and gradcam
+for image_path in glob.glob(os.path.join(data_dir, "test/*/*")):
     # image_path = 'data/polygonia_224_3cat_oversample-20/test/progne/progne_UASM370053_dorsal.jpg'
     img = PIL.Image.open(image_path)
 
     # print(pretrained_model)
-    idx_to_class = {v: k for k, v in image_datasets['test'].class_to_idx.items()}
 
     probs, label = predict2(image_path, pretrained_model.to(device))
     print(os.path.basename(image_path))
@@ -121,11 +126,15 @@ for image_path in glob.glob("data/polygonia_224_6cat_oversample-10/test/*/*"):
     file_name_to_export = "butterfly_gradcam"
 
     # Grad cam
-    grad_cam = GradCam(pretrained_model, target_layer=11)
+    grad_cam = GradCam(pretrained_model, target_layer=target_layer)
     # Generate cam mask
     cam = grad_cam.generate_cam(prep_img, target_class)
+
+
+
     # Save mask
     save_class_activation_images(crop_image, cam,
+                                 os.path.join('heatmaps', os.path.splitext(os.path.basename(model_dir))[0]),
                                  "{}_{}_{:.2f}".format(os.path.splitext(os.path.basename(image_path))[0],
                                                        idx_to_class[label[0]],
                                                        probs[0]))

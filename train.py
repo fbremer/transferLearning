@@ -34,13 +34,13 @@ num_epochs = 15
 feature_extract = True
 
 if __name__ == "__main__":
-    for data_dir in ["data/polygonia_224_6cat_oversample-10", "data/polygonia_224_3cat_oversample-20"]:
+    for data_dir in ["data/polygonia_224_6cat_oversample-10"]:
 
         # Number of classes in the dataset
         num_classes = len(glob(data_dir + "/train/*"))
 
         # for model_name in ["resnet", "alexnet", "vgg", "squeezenet", "densenet"]:
-        for model_name in ["resnet", "alexnet", "vgg", "squeezenet", "densenet"]:
+        for model_name in ["vgg16", "vgg16_bn", "vgg19", "vgg19_bn"]:
 
             # Initialize the model for this run
             model, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
@@ -71,10 +71,10 @@ if __name__ == "__main__":
             image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
                               for x in ['train', 'val']}
             # Create training and validation dataloaders
-            dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=4)
+            dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size,
+                                                          shuffle=True, num_workers=4)
                            for x in ['train', 'val']}
             class_names = image_datasets['train'].classes
-
 
             # Send the model to GPU
             model = model.to(device)
