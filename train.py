@@ -31,7 +31,7 @@ num_epochs = 15
 
 # Flag for feature extracting. When False, we finetune the whole model,
 #   when True we only update the reshaped layer params
-feature_extract = True
+feature_extract = False
 
 if __name__ == "__main__":
     for data_dir in ["data/polygonia_224_6cat_oversample-10"]:
