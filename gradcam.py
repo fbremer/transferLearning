@@ -1,3 +1,5 @@
+# Grad-CAM, adapted from Utku Ozbulak's pytorch-cnn-visualizations (MIT License):
+# https://github.com/utkuozbulak/pytorch-cnn-visualizations
 import copy
 import os
 
