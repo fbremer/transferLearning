@@ -63,3 +63,4 @@ updates (for example, the `pretrained=True` model arguments).
   by Nathan Inkawhich.
 - `gradcam.py` is adapted from Utku Ozbulak's
   [pytorch-cnn-visualizations](https://github.com/utkuozbulak/pytorch-cnn-visualizations) (MIT License).
+- The license notices for both are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
