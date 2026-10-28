@@ -7,7 +7,7 @@ Forest Bremer for Julian Dupuis's *Polygonia* species-delimitation work. The spe
 data. The questions were whether pretrained ImageNet CNNs could tell them apart from lab photographs of
 the wings, and whether the activations behind a classification showed human-readable wing features
 that could serve as characters for field guides and identification keys. Grad-CAM was the visualization
-used for the second question. By this method, Grad-CAM was not helpful for finding readable wing features. Devanshi Bhimjiyani was the
+used for the second question. By this method, Grad-CAM was not helpful for finding human-readable wing features. Devanshi Bhimjiyani was the
 student intern on the project with Forest.
 
 ## What it does
