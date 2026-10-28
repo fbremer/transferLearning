@@ -7,7 +7,7 @@ Forest Bremer for Julian Dupuis's *Polygonia* species-delimitation work. The spe
 data. The questions were whether pretrained ImageNet CNNs could tell them apart from lab photographs of
 the wings, and whether the activations behind a classification showed human-readable wing features
 that could serve as characters for field guides and identification keys. Grad-CAM was the visualization
-used for the second question. By this method, that was not helpful. Devanshi Bhimjiyani was the
+used for the second question. By this method, Grad-CAM was not helpful for finding readable wing features. Devanshi Bhimjiyani was the
 student intern on the project with Forest.
 
 ## What it does
@@ -43,7 +43,7 @@ The full table, including the 6-class, dorsal-only, and ventral-only runs, is in
 as the logged fraction.
 
 Grad-CAM visualizes the activations that lead to a classification. It was the attempt to see whether
-the models were detecting human-readable wing features. By this method, that was not helpful. The two
+the models were detecting human-readable wing features. By this method, Grad-CAM was not helpful for finding them. The two
 images under `gradcam/` in the photograph zip are those visualizations.
 
 ## Layout
