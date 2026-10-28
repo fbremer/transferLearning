@@ -7,7 +7,7 @@ Forest Bremer for Julian Dupuis's *Polygonia* species-delimitation work. The spe
 data. The questions were whether pretrained ImageNet CNNs could tell them apart from lab photographs of
 the wings, and which wing regions carry the difference, as candidate characters for field guides and
 identification keys. Grad-CAM was the tool for the second question. Devanshi Bhimjiyani was the
-student intern on the project with Forest. Her Colab notebook is in the image-set release.
+student intern on the project with Forest.
 
 ## What it does
 
@@ -73,12 +73,7 @@ The zip has four directories:
 - `source_224/`, the flat 224×224 photograph drop, 506 files, dorsal and ventral.
 - `gradcam/`, two saved heatmaps. Each filename is one image's prediction, not a test-set score.
 
-The same release has her Colab notebook, `ButterflyModel.ipynb`, and
-`dorsal-checkpoint.pth`, a DenseNet checkpoint stored with the dorsal images. Its dict records
-input size 224, batch size 64, 30 epochs, and class names faunus, gracilis, progne, and satyrus.
-The dict's `output_size` field is 102, which does not match those four names.
-
-Not recovered: the 6-class folder, the dorsal-only and ventral-only training folders, and the
+The release is that zip. Not recovered: the 6-class folder, the dorsal-only and ventral-only training folders, and the
 per-epoch `.pth` files named in `train.py`.
 
 ## Requirements
