@@ -5,8 +5,9 @@ Author: Forest Bremer. Commits under the name Woods26 are also his.
 Research code from the USDA-ARS Pacific Basin Agricultural Research Center in Hilo, 2019, written by
 Forest Bremer for Julian Dupuis's *Polygonia* species-delimitation work. The species were already separated by genomic
 data. The questions were whether pretrained ImageNet CNNs could tell them apart from lab photographs of
-the wings, and which wing regions carry the difference, as candidate characters for field guides and
-identification keys. Grad-CAM was the tool for the second question. Devanshi Bhimjiyani was the
+the wings, and whether the activations behind a classification showed human-readable wing features
+that could serve as characters for field guides and identification keys. Grad-CAM was the visualization
+used for the second question. By this method, that was not helpful. Devanshi Bhimjiyani was the
 student intern on the project with Forest.
 
 ## What it does
@@ -23,8 +24,9 @@ student intern on the project with Forest.
   architecture, and frozen against fine-tuned. Each run logs to TensorBoard and saves per-epoch
   weights with train and validation accuracy in the file name. The checked-in `train.py` is the last
   configuration used, not the whole sweep.
-- **Grad-CAM.** `test_model.py` runs saved models on held-out test images and writes heatmaps of the
-  wing regions each prediction relied on.
+- **Grad-CAM.** `test_model.py` writes a visualization of the activations that lead to a classification.
+  The aim was to see whether those activations were human-readable wing features. By this method, that
+  was not helpful.
 
 ## Results
 
@@ -42,8 +44,9 @@ The full table, including the 6-class, dorsal-only, and ventral-only runs, is in
 [RESULTS.md](RESULTS.md). Those three image folders were not in the download, so their rows stay
 as the logged fraction.
 
-Using Grad-CAM to turn what the models attended to into human-readable identification features was
-more exploratory, and no conclusions were written up.
+Grad-CAM visualizes the activations that lead to a classification. It was the attempt to see whether
+the models were detecting human-readable wing features. By this method, that was not helpful. The two
+images under `gradcam/` in the photograph zip are those visualizations.
 
 ## Layout
 
@@ -71,7 +74,9 @@ The zip has four directories:
 - `dorsal_1024_4class/`, 1024×768 dorsal photographs in four class folders (faunus, gracilis,
   progne, satyrus), train and val only.
 - `source_224/`, the flat 224×224 photograph drop, 506 files, dorsal and ventral.
-- `gradcam/`, two saved heatmaps. Each filename is one image's prediction, not a test-set score.
+- `gradcam/`, two Grad-CAM images. Each visualizes the activations that led to one classification, from
+  the attempt to see whether the model was detecting human-readable wing features. By this method, that
+  was not helpful.
 
 The release is that zip. Not recovered: the 6-class folder, the dorsal-only and ventral-only training folders, and the
 per-epoch `.pth` files named in `train.py`.
