@@ -58,6 +58,8 @@ images under `gradcam/` in the photograph zip are those visualizations.
 | `gradcam.py` | Grad-CAM implementation (see Credits) |
 | `logs/` | TensorBoard event files for the runs: `tensorboard --logdir logs` |
 | `RESULTS.md` | Validation accuracy read from those logs |
+| `ButterflyModel.ipynb` | Devanshi Bhimjiyani's Colab training notebook |
+| `checkpoint.pth` | DenseNet checkpoint stored with the dorsal images. Git LFS |
 
 ## Data
 
@@ -78,7 +80,18 @@ The zip has four directories:
   the attempt to see whether the model was detecting human-readable wing features. By this method, that
   was not helpful.
 
-The release is that zip. Not recovered: the 6-class folder, the dorsal-only and ventral-only training folders, and the
+The release is that zip.
+
+`ButterflyModel.ipynb` is Devanshi Bhimjiyani's Colab notebook. The saved run trains a frozen AlexNet
+on the three-species 224 set for 20 epochs. Its best validation accuracy in that output is 56 of 60.
+The head it builds has 102 outputs.
+
+`checkpoint.pth` is the checkpoint stored with the dorsal images. It is a DenseNet. The dict records
+input size 224, batch size 64, 30 epochs, and class names faunus, gracilis, progne, and satyrus. Its
+`output_size` field is 102. It is not a per-epoch weight file from `logs/`, and `test_model.py` loads
+a plain state dict, not this checkpoint. The file is 127 MB, so Git LFS stores it.
+
+Not recovered: the 6-class folder, the dorsal-only and ventral-only training folders, and the
 per-epoch `.pth` files named in `train.py`.
 
 ## Requirements
