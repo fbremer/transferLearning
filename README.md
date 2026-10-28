@@ -58,6 +58,7 @@ images under `gradcam/` in the photograph zip are those visualizations.
 | `gradcam.py` | Grad-CAM implementation (see Credits) |
 | `logs/` | TensorBoard event files for the runs: `tensorboard --logdir logs` |
 | `RESULTS.md` | Validation accuracy read from those logs |
+| `rebuild_imagefolders.py` | Rebuilds the ImageFolder directories from the photograph release |
 
 ## Data
 
@@ -67,19 +68,28 @@ in `polygonia-image-sets.zip`. The scripts expect torchvision `ImageFolder` layo
 `data/<dataset>/train/<class>/*.jpg` and `data/<dataset>/val/<class>/*.jpg`, plus a `test/` split
 for `test_model.py`.
 
-The zip has four directories:
+Each distinct photograph is stored once. The split tables name every training file,
+including the repeated copies.
 
-- `polygonia_224_3cat_oversample-20/`, the 224×224 three-species set above. Place it at
-  `data/polygonia_224_3cat_oversample-20`.
-- `dorsal_1024_4class/`, 1024×768 dorsal photographs in four class folders (faunus, gracilis,
-  progne, satyrus), train and val only.
-- `source_224/`, the flat 224×224 photograph drop, 506 files, dorsal and ventral.
-- `gradcam/`, two Grad-CAM images. Each visualizes the activations that led to one classification, from
-  the attempt to see whether the model was detecting human-readable wing features. By this method, that
-  was not helpful.
+- `photographs/224/`, 506 photographs at 224×224, dorsal and ventral.
+- `photographs/dorsal_1024/`, 253 dorsal photographs at 1024×768, one per specimen, in
+  species folders. The form stays in the filename.
+- `splits/polygonia_224_3cat_oversample-20.tsv`, faunus, progne, and satyrus. 504 training
+  rows (344 photographs and 160 repeated copies), 60 validation, 60 test.
+- `splits/dorsal_1024_4class.tsv`, faunus, gracilis, progne, and satyrus, train and val,
+  plus four filename aliases.
+- `gradcam/`, two Grad-CAM images. Each visualizes the activations that led to one
+  classification. The aim was human-readable wing features. By this method, that was not
+  helpful.
 
-The three-species set is faunus, progne, and satyrus. Gracilis is in the 224-pixel source drop, as
-gracilisG and gracilisZ, and in the dorsal set as its own class. It is not in the three-species split.
+Gracilis is in the 224-pixel photographs, as gracilisG and gracilisZ, and in the dorsal set
+as its own class. It is not in the three-species split.
+
+Rebuild the directories the scripts expect:
+
+    python rebuild_imagefolders.py /path/to/polygonia-image-sets
+
+That writes `data/polygonia_224_3cat_oversample-20/` and `data/dorsal_1024_4class/`.
 
 The release is that zip.
 
