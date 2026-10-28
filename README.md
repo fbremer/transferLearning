@@ -31,10 +31,15 @@ On the set that combines both wing views, for three species (`polygonia_224_3cat
 - 504 training images, after oversampling; 60 validation images (two per specimen, 10 specimens per
   species); 60 test images.
 - No specimen appears in more than one split.
-- At the final epoch, fine-tuned DenseNet, ResNet and VGG each classified 59 of 60 validation images
-  correctly (98%). The frozen-backbone versions reached 77 to 88%.
-- Validation accuracy also picked the best epoch, so treat these figures as optimistic. Test-set results
-  weren't logged.
+- At the last logged epoch, fine-tuned DenseNet, ResNet and VGG each classified 59 of 60 validation
+  images correctly. Each of those three runs also logged an earlier epoch at 60 of 60. Frozen-backbone
+  runs on this set finished between 46 and 53 of 60.
+- `train.py` saved weights for each epoch that matched or beat the best validation accuracy so far.
+  Those weight files were not in the recovered download. Test-set scores were not logged.
+
+The full table, including the 6-class, dorsal-only, and ventral-only runs, is in
+[RESULTS.md](RESULTS.md). Those three image folders were not in the download, so their rows stay
+as the logged fraction.
 
 Using Grad-CAM to turn what the models attended to into human-readable identification features was
 more exploratory, and no conclusions were written up.
@@ -48,12 +53,32 @@ more exploratory, and no conclusions were written up.
 | `test_model.py` | Evaluation on held-out images, with Grad-CAM output |
 | `gradcam.py` | Grad-CAM implementation (see Credits) |
 | `logs/` | TensorBoard event files for the runs: `tensorboard --logdir logs` |
+| `RESULTS.md` | Validation accuracy read from those logs |
 
 ## Data
 
-The wing photographs are not included. The scripts expect torchvision `ImageFolder` layout:
+The wing photographs are in the release
+[image-sets-2019](https://github.com/fbremer/transferLearning/releases/tag/image-sets-2019),
+in `polygonia-image-sets.zip`. The scripts expect torchvision `ImageFolder` layout:
 `data/<dataset>/train/<class>/*.jpg` and `data/<dataset>/val/<class>/*.jpg`, plus a `test/` split
 for `test_model.py`.
+
+The zip has four directories:
+
+- `polygonia_224_3cat_oversample-20/`, the 224×224 three-species set above. Place it at
+  `data/polygonia_224_3cat_oversample-20`.
+- `dorsal_1024_4class/`, 1024×768 dorsal photographs in four class folders (faunus, gracilis,
+  progne, satyrus), train and val only.
+- `source_224/`, the flat 224×224 photograph drop, 506 files, dorsal and ventral.
+- `gradcam/`, two saved heatmaps. Each filename is one image's prediction, not a test-set score.
+
+The same release has Devanshi Bhimjiyani's Colab notebook, `ButterflyModel.ipynb`, and
+`dorsal-checkpoint.pth`, a DenseNet checkpoint stored with the dorsal images. Its dict records
+input size 224, batch size 64, 30 epochs, and class names faunus, gracilis, progne, and satyrus.
+The dict's `output_size` field is 102, which does not match those four names.
+
+Not recovered: the 6-class folder, the dorsal-only and ventral-only training folders, and the
+per-epoch `.pth` files named in `train.py`.
 
 ## Requirements
 
