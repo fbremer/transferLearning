@@ -2,7 +2,9 @@
 
 Each number is `logs/val_acc` in `logs/`. The step numbers are the epoch indexes written at the time. Most runs logged epochs 1 through 14. A run whose directory name ends in `_finetune` updated the whole network. The others trained the new classifier on a frozen ImageNet backbone. A `_001` suffix is a second directory with that setting. `train.py` wrote a weight file for each epoch whose validation accuracy matched or beat the best so far. Those files were not in the Drive download. Test-set scores were not logged.
 
-Only `polygonia_224_3cat_oversample-20` is in the image-set release, and that validation split is 60 images, so those rows are also written as a count. The other three dataset folders were not in the download. Their rows stay as the logged fraction.
+Only the three-species split, `polygonia_224_3cat_oversample-20`, is in the image-set release. Its validation split is 60 images, so those rows are also written as a count. The other three dataset folders were not in the download. Their rows stay as the logged fraction.
+
+Runs whose name is `vgg16` or `vgg16_bn` were built by those branches in `transferLearner.py`. The `vgg16` branch constructs VGG-19, and the `vgg16_bn` branch constructs VGG-19 with batch norm.
 
 ## Both wing views, 3 species, oversample-20
 

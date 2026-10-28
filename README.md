@@ -13,7 +13,7 @@ student intern on the project with Forest.
 ## What it does
 
 - **Transfer learning on a small dataset.** Starts from ImageNet-pretrained torchvision models
-  (ResNet-18, AlexNet, VGG-11 with batch norm, SqueezeNet, DenseNet-121, and later VGG-16 variants). Each is trained two ways: with the
+  (ResNet-18, AlexNet, VGG-11 with batch norm, SqueezeNet, DenseNet-121, and later VGG runs). Each is trained two ways: with the
   backbone frozen and only the final layer retrained, and fully fine-tuned.
 - **Balanced classes and held-out specimens.** The dataset was small and uneven, so classes were
   regrouped. Whole specimens were held out for validation and test, and only then was the training set
@@ -25,8 +25,6 @@ student intern on the project with Forest.
   weights with train and validation accuracy in the file name. The checked-in `train.py` is the last
   configuration used, not the whole sweep.
 - **Grad-CAM.** `test_model.py` writes a visualization of the activations that lead to a classification.
-  The aim was to see whether those activations were human-readable wing features. By this method, that
-  was not helpful.
 
 ## Results
 
@@ -78,9 +76,7 @@ including the repeated copies.
   rows (344 photographs and 160 repeated copies), 60 validation, 60 test.
 - `splits/dorsal_1024_4class.tsv`, faunus, gracilis, progne, and satyrus, train and val,
   plus four filename aliases.
-- `gradcam/`, two Grad-CAM images. Each visualizes the activations that led to one
-  classification. The aim was human-readable wing features. By this method, that was not
-  helpful.
+- `gradcam/`, the two Grad-CAM visualizations.
 
 Gracilis is in the 224-pixel photographs, as gracilisG and gracilisZ, and in the dorsal set
 as its own class. It is not in the three-species split.
@@ -90,8 +86,6 @@ Rebuild the directories the scripts expect:
     python rebuild_imagefolders.py /path/to/polygonia-image-sets
 
 That writes `data/polygonia_224_3cat_oversample-20/` and `data/dorsal_1024_4class/`.
-
-The release is that zip.
 
 Not recovered: the 6-class folder, the dorsal-only and ventral-only training folders, and the
 per-epoch `.pth` files named in `train.py`.
@@ -107,7 +101,9 @@ model and data paths at its top (writes `heatmaps/`). View the curves with `tens
 
 Known issues, left as written in 2019: in `test_model.py` the test glob repeats `test/`, so it needs
 the path fixed before it finds images, and the per-epoch history in `transferLearner.py` stores
-accuracy in its loss fields. The TensorBoard loss curves are correct.
+accuracy in its loss fields. The TensorBoard loss curves are correct. The `vgg16` branch constructs
+VGG-19, and the `vgg16_bn` branch constructs VGG-19 with batch norm. Runs logged under those names
+are those models.
 
 ## Credits
 
