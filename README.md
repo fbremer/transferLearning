@@ -1,7 +1,7 @@
 # Butterfly wing classification with transfer learning
 
-Research code from the USDA-ARS Pacific Basin Agricultural Research Center in Hilo, 2019, written for
-Julian Dupuis's *Polygonia* species-delimitation work. The species were already separated by genomic
+Research code from the USDA-ARS Pacific Basin Agricultural Research Center in Hilo, 2019, written by
+Forest Bremer for Julian Dupuis's *Polygonia* species-delimitation work. The species were already separated by genomic
 data. The questions were whether pretrained ImageNet CNNs could tell them apart from lab photographs of
 the wings, and which wing regions carry the difference, as candidate characters for field guides and
 identification keys. Grad-CAM was the tool for the second question.
@@ -57,6 +57,8 @@ Written in 2019 against PyTorch 1.x and torchvision of that era: `torch`, `torch
 updates (for example, the `pretrained=True` model arguments).
 
 ## Credits
+
+Commits under the name Woods26 are also Forest Bremer's.
 
 - The training loop and model setup follow the PyTorch tutorial
   [Finetuning Torchvision Models](https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html)
